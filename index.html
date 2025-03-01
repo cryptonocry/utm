@@ -30,7 +30,8 @@
       margin-bottom: 40px;
     }
     .final-link-input {
-      flex: 1;
+      /* Увеличиваем длину поля примерно на 20% */
+      flex: 1.2;
       padding: 14px 16px;
       background-color: #2C2C2C;
       border: 1px solid #3C3C3C;
@@ -109,7 +110,8 @@
     /* ====== ОСНОВНОЙ КОНТЕНТ ====== */
     .main-content {
       display: flex;
-      gap: 40px; 
+      /* Увеличиваем расстояние между колонками в 2 раза (было 40px, делаем 80px) */
+      gap: 80px; 
     }
 
     /* Левая колонка - выбор типа ссылки */
@@ -194,6 +196,11 @@
     }
     .field-group input[type="text"]::placeholder {
       color: #777;
+    }
+    .field-group input[type="text"]:disabled {
+      background-color: #444; 
+      cursor: not-allowed;
+      opacity: 0.6;
     }
 
     /* Подсказки (дропдаун) для UTM-полей */
@@ -421,7 +428,7 @@
           <div class="field-group">
             <label for="promoCode">Промокод</label>
             <div class="input-with-dropdown">
-              <input type="text" id="promoCode" placeholder="Например SALE7" maxlength="10" />
+              <input type="text" id="promoCode" placeholder="Например SALE7" maxlength="10" disabled />
               <button class="dropdown-btn" data-field="promocode" type="button">▼</button>
               <ul class="suggestions" data-suggest="promocode"></ul>
             </div>
@@ -449,7 +456,7 @@
       campaign: {},
       content: {},
       promocode: {},
-      invitecode: {} // <== Для поля "Инвайт Код"
+      invitecode: {} // Для поля "Инвайт Код"
     };
     let lastLinks = [];
 
@@ -508,7 +515,7 @@
       // Radio для mode (пополнение)
       const modeRadios = document.querySelectorAll('input[name="modeRadio"]');
       modeRadios.forEach(r => {
-        r.addEventListener('change', updateLink);
+        r.addEventListener('change', onModeChange);
       });
 
       // Кнопка копирования
@@ -537,12 +544,8 @@
       });
     }
 
-    /* 
-       !!! ГЛАВНОЕ ИЗМЕНЕНИЕ:
-       Запрещаем ввод кириллицы + точки + пробел + слэш
-    */
+    /* Запрет на . / пробел и русские буквы */
     function validateInput(el) {
-      // Убираем ., /, пробел, и кириллицу (русские буквы любого регистра, включая ё/Ё)
       el.value = el.value.replace(/[.\s\/а-яА-ЯёЁ]/g, '');
     }
 
@@ -581,6 +584,21 @@
       } else {
         el.style.opacity = '0.3';
         el.style.pointerEvents = 'none';
+      }
+    }
+
+    /* Когда меняем Mode (login/skin) */
+    function onModeChange(e) {
+      updateLink();
+      const modeVal = e.target.value; 
+      const promoEl = document.getElementById('promoCode');
+      if(modeVal === 'skin') {
+        // Выключаем промокод
+        promoEl.disabled = true;
+        promoEl.value = ''; // очищаем, чтобы не попадал в ссылку
+      } else {
+        // login -> включаем
+        promoEl.disabled = false;
       }
     }
 
@@ -740,6 +758,7 @@
         case 'promocode':  document.getElementById('promoCode').value = val; break;
         case 'invitecode': document.getElementById('inviteCode').value = val; break;
       }
+      updateLink();
     }
 
     /* ====== Последние ссылки (top-10) ====== */
@@ -760,7 +779,6 @@
         li.textContent = link;
         li.addEventListener('click', (e) => {
           e.stopPropagation();
-          // По ТЗ не нужно восстанавливать поля, только копируем
           navigator.clipboard.writeText(link).then(() => {
             showToast("Ссылка скопирована из истории!");
           });
