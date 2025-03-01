@@ -393,7 +393,6 @@
           <!-- Инвайт Код (макс 10 символов) -->
           <div class="field-group">
             <label for="inviteCode">Инвайт Код</label>
-            <!-- Аналог UTM-полей, с кнопкой-дропдауном и топ-10 -->
             <div class="input-with-dropdown">
               <input 
                 type="text" 
@@ -428,7 +427,8 @@
           <div class="field-group">
             <label for="promoCode">Промокод</label>
             <div class="input-with-dropdown">
-              <input type="text" id="promoCode" placeholder="Например SALE7" maxlength="10" disabled />
+              <!-- Убираем disabled отсюда, чтобы при login поле было доступно сразу -->
+              <input type="text" id="promoCode" placeholder="Например SALE7" maxlength="10" />
               <button class="dropdown-btn" data-field="promocode" type="button">▼</button>
               <ul class="suggestions" data-suggest="promocode"></ul>
             </div>
@@ -456,7 +456,7 @@
       campaign: {},
       content: {},
       promocode: {},
-      invitecode: {} // Для поля "Инвайт Код"
+      invitecode: {}
     };
     let lastLinks = [];
 
@@ -466,6 +466,13 @@
     window.addEventListener('load', () => {
       loadFromStorage();
       initEventListeners();
+
+      // При загрузке страницы смотрим, какой modeRadio выбран (login/skin)
+      const modeRadio = document.querySelector('input[name="modeRadio"]:checked');
+      if (modeRadio) {
+        onModeChange({ target: modeRadio }); // Применим состояние к промокоду
+      }
+
       updateLink(); 
     });
 
@@ -550,7 +557,6 @@
     }
 
     function onSelectLinkType(e) {
-      // Снимаем .selected со всех
       document.getElementById('btnApp').classList.remove('selected');
       document.getElementById('btnTopup').classList.remove('selected');
       document.getElementById('btnCashout').classList.remove('selected');
@@ -558,7 +564,6 @@
       e.currentTarget.classList.add('selected');
       currentLinkType = e.currentTarget.getAttribute('data-type');
 
-      // Переключаем видимость блоков
       toggleAppOptions(currentLinkType);
       toggleTopupOptions(currentLinkType);
 
@@ -587,11 +592,12 @@
       }
     }
 
-    /* Когда меняем Mode (login/skin) */
+    /* Меняем состояние поля промокода */
     function onModeChange(e) {
       updateLink();
       const modeVal = e.target.value; 
       const promoEl = document.getElementById('promoCode');
+
       if(modeVal === 'skin') {
         // Выключаем промокод
         promoEl.disabled = true;
@@ -602,7 +608,6 @@
       }
     }
 
-    /* Формируем ссылку на лету */
     function updateLink() {
       const sourceVal   = document.getElementById('utmSource').value.trim();
       const mediumVal   = document.getElementById('utmMedium').value.trim();
@@ -626,7 +631,6 @@
       let finalUrl = '';
 
       if(currentLinkType === 'app') {
-        // https://t.me/steamify_bot/app?startapp=[inviteVal]-utm_source=xxx-...
         finalUrl = 'https://t.me/steamify_bot/app';
         let parts = [];
         if(inviteVal)    parts.push(inviteVal);
@@ -641,7 +645,6 @@
         }
       }
       else if(currentLinkType === 'topup') {
-        // https://steamify.io/topup?mode=xxx&promocode=xxx&utm_source=xxx...
         finalUrl = 'https://steamify.io/topup';
         let params = [];
         params.push(`mode=${modeVal}`);
@@ -656,7 +659,6 @@
         }
       }
       else if(currentLinkType === 'cashout') {
-        // https://steamify.io/cashout?utm_source=xxx&utm_medium=xxx&...
         finalUrl = 'https://steamify.io/cashout';
         let params = [];
         if(sourceVal)   params.push(`utm_source=${sourceVal}`);
@@ -677,7 +679,6 @@
       if(!link) return;
       navigator.clipboard.writeText(link).then(() => {
         showToast("Ссылка скопирована!");
-        // Добавляем в историю
         addLinkToHistory(link);
         updatePopularity();
         saveToStorage();
