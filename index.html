@@ -427,7 +427,6 @@
           <div class="field-group">
             <label for="promoCode">Промокод</label>
             <div class="input-with-dropdown">
-              <!-- Убираем disabled отсюда, чтобы при login поле было доступно сразу -->
               <input type="text" id="promoCode" placeholder="Например SALE7" maxlength="10" />
               <button class="dropdown-btn" data-field="promocode" type="button">▼</button>
               <ul class="suggestions" data-suggest="promocode"></ul>
@@ -447,6 +446,7 @@
       ЛОГИКА РАБОТЫ САЙТА
       =====================
     */
+
     const STORAGE_KEY_POPULAR = 'utmPopularValues_v2'; 
     const STORAGE_KEY_LASTLINKS = 'utmLastLinks_v2';
 
@@ -487,7 +487,6 @@
         console.warn("Ошибка чтения localStorage:", e);
       }
     }
-
     function saveToStorage() {
       try {
         localStorage.setItem(STORAGE_KEY_POPULAR, JSON.stringify(popularValues));
@@ -540,7 +539,7 @@
         closeLastLinks();
       });
 
-      // Дропдауны подсказок
+      // Дропдауны подсказок (топ-10) 
       const dropdownBtns = document.querySelectorAll('.dropdown-btn[data-field]');
       dropdownBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -599,15 +598,16 @@
       const promoEl = document.getElementById('promoCode');
 
       if(modeVal === 'skin') {
-        // Выключаем промокод
+        // Отключаем поле промокода
         promoEl.disabled = true;
-        promoEl.value = ''; // очищаем, чтобы не попадал в ссылку
+        promoEl.value = ''; 
       } else {
         // login -> включаем
         promoEl.disabled = false;
       }
     }
 
+    /* ====== ФОРМИРОВАНИЕ ССЫЛКИ ====== */
     function updateLink() {
       const sourceVal   = document.getElementById('utmSource').value.trim();
       const mediumVal   = document.getElementById('utmMedium').value.trim();
@@ -619,7 +619,9 @@
       // Язык
       let langVal = 'ru';
       const langRadioChecked = document.querySelector('input[name="utmLangRadio"]:checked');
-      if(langRadioChecked) langVal = langRadioChecked.value;
+      if(langRadioChecked) {
+        langVal = langRadioChecked.value;
+      }
 
       // Mode (для пополнения)
       let modeVal = 'login';
@@ -630,9 +632,15 @@
 
       let finalUrl = '';
 
+      /* 
+        При "Приложение" или "Сайт Скупка" всё как прежде.
+        При "Сайт Пополнение" смотрим, login => /topup, skin => /topup/skins.
+      */
       if(currentLinkType === 'app') {
         finalUrl = 'https://t.me/steamify_bot/app';
+
         let parts = [];
+        // Если есть invite, добавим первым
         if(inviteVal)    parts.push(inviteVal);
         if(sourceVal)    parts.push(`utm_source=${sourceVal}`);
         if(mediumVal)    parts.push(`utm_medium=${mediumVal}`);
@@ -645,15 +653,23 @@
         }
       }
       else if(currentLinkType === 'topup') {
-        finalUrl = 'https://steamify.io/topup';
+        // Если mode=login => /topup
+        // Если mode=skin => /topup/skins
+        if(modeVal === 'skin') {
+          finalUrl = 'https://steamify.io/topup/skins';
+        } else {
+          finalUrl = 'https://steamify.io/topup';
+        }
+
+        // Остальные параметры идут ?promocode=...&utm_source=... и т.д.
         let params = [];
-        params.push(`mode=${modeVal}`);
         if(promoVal)     params.push(`promocode=${promoVal}`);
         if(sourceVal)    params.push(`utm_source=${sourceVal}`);
         if(mediumVal)    params.push(`utm_medium=${mediumVal}`);
         if(campaignVal)  params.push(`utm_campaign=${campaignVal}`);
         if(contentVal)   params.push(`utm_content=${contentVal}`);
         if(langVal)      params.push(`utm_lang=${langVal}`);
+
         if(params.length > 0) {
           finalUrl += '?' + params.join('&');
         }
@@ -661,11 +677,12 @@
       else if(currentLinkType === 'cashout') {
         finalUrl = 'https://steamify.io/cashout';
         let params = [];
-        if(sourceVal)   params.push(`utm_source=${sourceVal}`);
-        if(mediumVal)   params.push(`utm_medium=${mediumVal}`);
-        if(campaignVal) params.push(`utm_campaign=${campaignVal}`);
-        if(contentVal)  params.push(`utm_content=${contentVal}`);
-        if(langVal)     params.push(`utm_lang=${langVal}`);
+        if(sourceVal)    params.push(`utm_source=${sourceVal}`);
+        if(mediumVal)    params.push(`utm_medium=${mediumVal}`);
+        if(campaignVal)  params.push(`utm_campaign=${campaignVal}`);
+        if(contentVal)   params.push(`utm_content=${contentVal}`);
+        if(langVal)      params.push(`utm_lang=${langVal}`);
+
         if(params.length > 0) {
           finalUrl += '?' + params.join('&');
         }
@@ -674,6 +691,7 @@
       document.getElementById('finalLink').value = finalUrl;
     }
 
+    /* ====== КОПИРОВАНИЕ ССЫЛКИ ====== */
     function copyLinkToClipboard() {
       const link = document.getElementById('finalLink').value;
       if(!link) return;
@@ -694,6 +712,7 @@
       }
     }
 
+    /* ====== ПОДСЧЁТ ПОПУЛЯРНОСТИ ====== */
     function updatePopularity() {
       const sourceVal   = document.getElementById('utmSource').value.trim();
       const mediumVal   = document.getElementById('utmMedium').value.trim();
@@ -720,7 +739,7 @@
       popularValues[field][val]++;
     }
 
-    /* ====== Подсказки (top-10) ====== */
+    /* ====== ПОДСКАЗКИ (top-10) ====== */
     function showSuggestions(field) {
       closeAllSuggestions();
       const ul = document.querySelector(`.suggestions[data-suggest="${field}"]`);
@@ -762,7 +781,7 @@
       updateLink();
     }
 
-    /* ====== Последние ссылки (top-10) ====== */
+    /* ====== СПИСОК ПОСЛЕДНИХ ССЫЛОК (top-10) ====== */
     function toggleLastLinks() {
       const listEl = document.getElementById('lastLinksList');
       if(listEl.style.display === 'block') {
@@ -793,7 +812,7 @@
       listEl.style.display = 'none';
     }
 
-    /* ====== Toast-уведомление ====== */
+    /* ====== TOAST-УВЕДОМЛЕНИЕ ====== */
     function showToast(msg) {
       const toast = document.getElementById('toastMsg');
       toast.textContent = msg;
