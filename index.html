@@ -55,7 +55,7 @@
     .right-col { display: flex; flex-direction: column; gap: 20px; min-width: 220px; }
     .right-col h2 { font-size: 16px; color: #aaa; margin-bottom: 12px; }
 
-    /* Группы полей */
+    /* Поля */
     .field-group { display: flex; flex-direction: column; gap: 6px; }
     .field-group label { font-size: 14px; color: #aaa; }
     .field-group input[type="text"], .field-group select {
@@ -67,9 +67,6 @@
 
     /* Дропдаун */
     .input-with-dropdown { position: relative; }
-    .input-with-dropdown input[type="text"] {
-      width: 100%; box-sizing: border-box; padding-right: 40px;
-    }
     .dropdown-btn {
       position: absolute; right: 2px; top: 2px; bottom: 2px; width: 30px;
       background: none; border: none; cursor: pointer; color: #fff;
@@ -120,7 +117,6 @@
 
     <!-- Основной контент -->
     <div class="main-content">
-
       <!-- Левая -->
       <div class="left-col">
         <h2>Ссылка</h2>
@@ -206,15 +202,249 @@
           </div>
         </div>
       </div>
-
-    </div><!-- /.main-content -->
-  </div><!-- /.container -->
+    </div>
+  </div>
 
   <!-- Toast -->
   <div id="toastMsg" class="toast">Ссылка скопирована!</div>
 
   <script>
-    // ваша существующая JS‑логика...
+    const STORAGE_KEY_POPULAR = 'utmPopularValues_v2';
+    const STORAGE_KEY_LASTLINKS = 'utmLastLinks_v2';
+    let popularValues = { source:{}, medium:{}, campaign:{}, content:{}, promocode:{}, invitecode:{} };
+    let lastLinks = [];
+    let currentLinkType = 'app';
+
+    window.addEventListener('load', () => {
+      try {
+        const p = localStorage.getItem(STORAGE_KEY_POPULAR);
+        if (p) popularValues = JSON.parse(p);
+        const l = localStorage.getItem(STORAGE_KEY_LASTLINKS);
+        if (l) lastLinks = JSON.parse(l);
+      } catch(e) { console.warn(e); }
+
+      initEventListeners();
+      onModeChange({ target: document.querySelector('input[name="modeRadio"]:checked') });
+      updateLink();
+    });
+
+    function initEventListeners() {
+      ['btnApp','btnTopup','btnCashout','btnHome']
+        .forEach(id => document.getElementById(id).addEventListener('click', onSelectLinkType));
+
+      ['utmSource','utmMedium','utmCampaign','utmContent','promoCode','inviteCode']
+        .forEach(id => document.getElementById(id).addEventListener('input', e => {
+          validateInput(e.target);
+          updateLink();
+        }));
+
+      document.querySelectorAll('input[name="utmLangRadio"]')
+        .forEach(r => r.addEventListener('change', updateLink));
+
+      document.querySelectorAll('input[name="modeRadio"]')
+        .forEach(r => r.addEventListener('change', onModeChange));
+
+      document.getElementById('copyLinkBtn').addEventListener('click', copyLinkToClipboard);
+      document.getElementById('lastLinksToggle').addEventListener('click', e => {
+        e.stopPropagation();
+        toggleLastLinks();
+      });
+      document.addEventListener('click', () => {
+        closeAllSuggestions();
+        closeLastLinks();
+      });
+
+      document.querySelectorAll('.dropdown-btn[data-field]')
+        .forEach(btn => btn.addEventListener('click', e => {
+          e.stopPropagation();
+          showSuggestions(btn.dataset.field);
+        }));
+    }
+
+    function validateInput(el) {
+      el.value = el.value.replace(/[.\s\/а-яА-ЯёЁ]/g, '');
+    }
+
+    function onSelectLinkType(e) {
+      ['btnApp','btnTopup','btnCashout','btnHome']
+        .forEach(id => document.getElementById(id).classList.remove('selected'));
+      e.currentTarget.classList.add('selected');
+      currentLinkType = e.currentTarget.dataset.type;
+      toggleAppOptions(currentLinkType);
+      toggleTopupOptions(currentLinkType);
+      updateLink();
+    }
+
+    function toggleAppOptions(type) {
+      const el = document.getElementById('appOptions');
+      el.style.opacity = type==='app' ? '1' : '0.3';
+      el.style.pointerEvents = type==='app' ? 'auto' : 'none';
+    }
+    function toggleTopupOptions(type) {
+      const el = document.getElementById('topupOptions');
+      el.style.opacity = type==='topup' ? '1' : '0.3';
+      el.style.pointerEvents = type==='topup' ? 'auto' : 'none';
+    }
+
+    function onModeChange(e) {
+      const promo = document.getElementById('promoCode');
+      if (e.target.value==='skin') {
+        promo.disabled = true;
+        promo.value = '';
+      } else {
+        promo.disabled = false;
+      }
+      updateLink();
+    }
+
+    function updateLink() {
+      const src = document.getElementById('utmSource').value.trim();
+      const med = document.getElementById('utmMedium').value.trim();
+      const cmp = document.getElementById('utmCampaign').value.trim();
+      const cnt = document.getElementById('utmContent').value.trim();
+      const prm = document.getElementById('promoCode').value.trim();
+      const inv = document.getElementById('inviteCode').value.trim();
+      const lang = document.querySelector('input[name="utmLangRadio"]:checked').value;
+      const mode = document.querySelector('input[name="modeRadio"]:checked')?.value || 'login';
+
+      let url = '';
+      let params = [];
+
+      if (currentLinkType==='app') {
+        url = 'https://t.me/steamify_bot/app';
+        const parts = [];
+        if (inv) parts.push(inv);
+        if (src) parts.push(`utm_source=${src}`);
+        if (med) parts.push(`utm_medium=${med}`);
+        if (cmp) parts.push(`utm_campaign=${cmp}`);
+        if (cnt) parts.push(`utm_content=${cnt}`);
+        if (lang) parts.push(`utm_lang=${lang}`);
+        if (parts.length) url += '?startapp=' + parts.join('-');
+      }
+      else if (currentLinkType==='topup') {
+        url = mode==='skin'
+          ? 'https://steamify.io/topup/skins'
+          : 'https://steamify.io/topup';
+        if (prm) params.push(`promocode=${prm}`);
+        if (src) params.push(`utm_source=${src}`);
+        if (med) params.push(`utm_medium=${med}`);
+        if (cmp) params.push(`utm_campaign=${cmp}`);
+        if (cnt) params.push(`utm_content=${cnt}`);
+        if (lang) params.push(`utm_lang=${lang}`);
+      }
+      else if (currentLinkType==='cashout') {
+        url = 'https://steamify.io/cashout';
+        if (src) params.push(`utm_source=${src}`);
+        if (med) params.push(`utm_medium=${med}`);
+        if (cmp) params.push(`utm_campaign=${cmp}`);
+        if (cnt) params.push(`utm_content=${cnt}`);
+        if (lang) params.push(`utm_lang=${lang}`);
+      }
+      else if (currentLinkType==='home') {
+        url = 'https://steamify.io/';
+        if (src) params.push(`utm_source=${src}`);
+        if (med) params.push(`utm_medium=${med}`);
+        if (cmp) params.push(`utm_campaign=${cmp}`);
+        if (cnt) params.push(`utm_content=${cnt}`);
+        if (lang) params.push(`utm_lang=${lang}`);
+      }
+
+      if (params.length) {
+        url += (url.includes('?') ? '&' : '?') + params.join('&');
+      }
+
+      document.getElementById('finalLink').value = url;
+    }
+
+    function copyLinkToClipboard() {
+      const link = document.getElementById('finalLink').value;
+      if (!link) return;
+      navigator.clipboard.writeText(link).then(() => {
+        showToast("Ссылка скопирована!");
+        lastLinks.unshift(link);
+        if (lastLinks.length>10) lastLinks.length=10;
+        updatePopularity();
+        saveToStorage();
+      });
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY_POPULAR, JSON.stringify(popularValues));
+        localStorage.setItem(STORAGE_KEY_LASTLINKS, JSON.stringify(lastLinks));
+      } catch(e) { console.warn(e); }
+    }
+
+    function updatePopularity() {
+      const map = {
+        source:'utmSource', medium:'utmMedium', campaign:'utmCampaign',
+        content:'utmContent', promocode:'promoCode', invitecode:'inviteCode'
+      };
+      for (let key in map) {
+        const v = document.getElementById(map[key]).value.trim();
+        if (!v) continue;
+        popularValues[key] = popularValues[key]||{};
+        popularValues[key][v] = (popularValues[key][v]||0) + 1;
+      }
+    }
+
+    function showSuggestions(field) {
+      closeAllSuggestions();
+      const ul = document.querySelector(`.suggestions[data-suggest="${field}"]`);
+      if (!ul) return;
+      const list = Object.entries(popularValues[field]||{})
+        .sort((a,b)=>b[1]-a[1]).slice(0,10);
+      ul.innerHTML = '';
+      list.forEach(([val])=>{
+        const li = document.createElement('li');
+        li.textContent = val;
+        li.addEventListener('click', ()=>{
+          document.getElementById({
+            source:'utmSource', medium:'utmMedium', campaign:'utmCampaign',
+            content:'utmContent', promocode:'promoCode', invitecode:'inviteCode'
+          }[field]).value = val;
+          updateLink();
+          closeAllSuggestions();
+        });
+        ul.appendChild(li);
+      });
+      if (list.length) ul.style.display = 'block';
+    }
+
+    function closeAllSuggestions() {
+      document.querySelectorAll('.suggestions').forEach(s=>s.style.display='none');
+    }
+
+    function toggleLastLinks() {
+      const el = document.getElementById('lastLinksList');
+      el.style.display = el.style.display==='block' ? 'none' : 'block';
+      if (el.style.display==='block') renderLastLinks();
+    }
+
+    function renderLastLinks() {
+      const ul = document.getElementById('lastLinksList');
+      ul.innerHTML = '';
+      lastLinks.forEach(link=>{
+        const li = document.createElement('li');
+        li.textContent = link;
+        li.addEventListener('click', ()=>{
+          navigator.clipboard.writeText(link)
+            .then(()=>showToast("Ссылка скопирована из истории!"));
+        });
+        ul.appendChild(li);
+      });
+    }
+
+    function closeLastLinks() {
+      document.getElementById('lastLinksList').style.display='none';
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMsg');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'),2000);
+    }
   </script>
 </body>
 </html>
