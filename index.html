@@ -5,314 +5,85 @@
   <title>Генератор UTM-ссылок</title>
   <style>
     /* ====== Общие стили ====== */
-    * {
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box;
-    }
-    body {
-      background-color: #1E1E1E;
-      color: #F0F0F0;
-      font-family: 'Arial', sans-serif; 
-      line-height: 1.4;
-    }
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    /* ====== ВЕРХНЯЯ СТРОКА: Поле ссылки и кнопки копирования ====== */
-    .top-row {
-      display: flex;
-      align-items: center;
-      position: relative;
-      margin-bottom: 40px;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#1E1E1E; color:#F0F0F0; font-family:'Arial',sans-serif; line-height:1.4; }
+    .container { max-width:1100px; margin:0 auto; padding:20px; }
+    .top-row { display:flex; align-items:center; position:relative; margin-bottom:40px; }
     .final-link-input {
-      /* Увеличиваем длину поля примерно на 20% */
-      flex: 1.2;
-      padding: 14px 16px;
-      background-color: #2C2C2C;
-      border: 1px solid #3C3C3C;
-      border-radius: 8px;
-      color: #F0F0F0;
-      font-size: 13px;
-      outline: none;
+      flex:1.2; padding:14px 16px; background:#2C2C2C; border:1px solid #3C3C3C;
+      border-radius:8px; color:#F0F0F0; font-size:13px; outline:none;
     }
-    .final-link-input::placeholder {
-      color: #777;
+    .final-link-input::placeholder { color:#777; }
+    .copy-icon-btn, .last-links-toggle {
+      width:40px; height:40px; background:none; border:none; outline:none;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
     }
-
-    /* Кнопка копирования (иконка) */
-    .copy-icon-btn {
-      width: 40px;
-      height: 40px;
-      background: none;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      margin-left: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .copy-icon-btn:hover svg path {
-      stroke: #aaa;
-    }
-
-    /* Список последних ссылок (выпадающий) */
+    .copy-icon-btn:hover svg path { stroke:#aaa; }
+    .last-links-toggle:hover { opacity:.8; }
     .last-links-dropdown {
-      position: absolute;
-      top: 60px;
-      left: 0;
-      right: 60px;
-      background-color: #2C2C2C;
-      border: 1px solid #3C3C3C;
-      border-radius: 8px;
-      display: none;
-      z-index: 9999;
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 6px 0;
+      position:absolute; top:60px; left:0; right:60px; background:#2C2C2C;
+      border:1px solid #3C3C3C; border-radius:8px; display:none; z-index:9999;
+      max-height:200px; overflow-y:auto; padding:6px 0;
     }
     .last-links-dropdown li {
-      padding: 8px 16px;
-      font-size: 13px;
-      border-bottom: 1px solid #3C3C3C;
-      word-break: break-all;
-      cursor: pointer;
-      color: #A0CFFF; 
+      padding:8px 16px; font-size:13px; border-bottom:1px solid #3C3C3C;
+      word-break:break-all; cursor:pointer; color:#A0CFFF;
     }
-    .last-links-dropdown li:hover {
-      background-color: #3C3C3C;
-    }
-
-    /* Кнопка выпадающего меню (для последних ссылок) */
-    .last-links-toggle {
-      position: absolute;
-      right: 48px;
-      top: 0;
-      bottom: 0;
-      width: 40px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      outline: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .last-links-toggle:hover {
-      opacity: 0.8;
-    }
-
-    /* ====== ОСНОВНОЙ КОНТЕНТ ====== */
-    .main-content {
-      display: flex;
-      /* Увеличиваем расстояние между колонками в 2 раза (было 40px, делаем 80px) */
-      gap: 80px; 
-    }
-
-    /* Левая колонка - выбор типа ссылки */
-    .left-col {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      min-width: 180px;
-    }
-    .left-col h2 {
-      font-size: 16px;
-      font-weight: normal;
-      margin-bottom: 12px;
-      color: #aaa;
-    }
+    .last-links-dropdown li:hover { background:#3C3C3C; }
+    .main-content { display:flex; gap:80px; }
+    .left-col { display:flex; flex-direction:column; gap:20px; min-width:180px; }
+    .left-col h2, .center-col h2, .right-col h2 { font-size:16px; font-weight:400; margin-bottom:12px; color:#aaa; }
     .link-type-btn {
-      background-color: #2C2C2C;
-      border: 1px solid #3C3C3C;
-      border-radius: 8px;
-      padding: 12px 16px;
-      color: #F0F0F0;
-      font-size: 14px;
-      text-align: left;
-      cursor: pointer;
-      outline: none;
-      transition: border-color 0.2s;
+      background:#2C2C2C; border:1px solid #3C3C3C; border-radius:8px;
+      padding:12px 16px; color:#F0F0F0; font-size:14px; text-align:left;
+      cursor:pointer; transition:border-color .2s;
     }
-    .link-type-btn:hover {
-      border-color: #555;
+    .link-type-btn:hover { border-color:#555; }
+    .link-type-btn.selected { border-color:#AAA; }
+    .center-col, .right-col { display:flex; flex-direction:column; gap:20px; }
+    .right-col { min-width:220px; }
+    .field-group { display:flex; flex-direction:column; gap:6px; }
+    .field-group label { font-size:14px; color:#aaa; }
+    .field-group input[type="text"], .field-group select {
+      padding:10px; background:#2C2C2C; border:1px solid #3C3C3C; border-radius:6px;
+      color:#F0F0F0; font-size:14px; outline:none;
     }
-    /* Когда кнопка выбрана */
-    .link-type-btn.selected {
-      border-color: #AAA; 
-    }
-
-    /* Средняя колонка - поля UTM */
-    .center-col {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .center-col h2 {
-      font-size: 16px;
-      font-weight: normal;
-      margin-bottom: 12px;
-      color: #aaa;
-    }
-
-    /* Правая колонка - Доп.блоки (Приложение / Пополнение) */
-    .right-col {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      min-width: 220px;
-    }
-    .right-col h2 {
-      font-size: 16px;
-      font-weight: normal;
-      margin-bottom: 12px;
-      color: #aaa;
-    }
-
-    /* Общие стили для групп полей */
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .field-group label {
-      font-size: 14px;
-      color: #aaa;
-    }
-    .field-group input[type="text"],
-    .field-group select {
-      padding: 10px;
-      background-color: #2C2C2C;
-      border: 1px solid #3C3C3C;
-      border-radius: 6px;
-      color: #F0F0F0;
-      font-size: 14px;
-      outline: none;
-    }
-    .field-group input[type="text"]::placeholder {
-      color: #777;
-    }
-    .field-group input[type="text"]:disabled {
-      background-color: #444; 
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    /* Подсказки (дропдаун) для UTM-полей */
+    .field-group input::placeholder { color:#777; }
+    .field-group input:disabled { background:#444; cursor:not-allowed; opacity:.6; }
+    .input-with-dropdown { position:relative; }
     .dropdown-btn {
-      position: absolute;
-      right: 2px;
-      top: 2px;
-      bottom: 2px;
-      width: 30px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #fff;
+      position:absolute; right:2px; top:2px; bottom:2px; width:30px;
+      background:none; border:none; cursor:pointer; color:#fff;
     }
     .suggestions {
-      position: absolute;
-      top: 44px;
-      left: 0;
-      right: 0;
-      background-color: #2C2C2C;
-      border: 1px solid #3C3C3C;
-      border-radius: 6px;
-      z-index: 9999;
-      max-height: 200px;
-      overflow-y: auto;
-      display: none;
-      list-style: none;
-      margin: 0;
-      padding: 0;
+      position:absolute; top:44px; left:0; right:0; background:#2C2C2C;
+      border:1px solid #3C3C3C; border-radius:6px; z-index:9999;
+      max-height:200px; overflow-y:auto; display:none;
     }
-    .suggestions li {
-      padding: 8px 12px;
-      border-bottom: 1px solid #3C3C3C;
-      cursor: pointer;
-    }
-    .suggestions li:hover {
-      background-color: #3C3C3C;
-    }
-
-    /* Обёртка для поля + кнопка-дропдаун */
-    .input-with-dropdown {
-      position: relative;
-    }
-
-    /* Радио-кнопки (Ru / Eng / Login / Skin) */
-    .radio-group {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 10px; /* Отступ после кружочков */
-    }
-    .radio-group label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-    /* Увеличение круга радио-кнопок */
-    .radio-group input[type="radio"] {
-      accent-color: #555; 
-      transform: scale(1.3); 
-    }
-
-    /* Отдельный отступ между блоками Приложения и Пополнения */
-    #topupOptions {
-      margin-top: 30px; /* Добавляем вертикальный отступ */
-    }
-
-    /* Toast */
+    .suggestions li { padding:8px 12px; border-bottom:1px solid #3C3C3C; cursor:pointer; }
+    .suggestions li:hover { background:#3C3C3C; }
+    .radio-group { display:flex; gap:20px; margin-bottom:10px; }
+    .radio-group input[type="radio"] { accent-color:#555; transform:scale(1.3); }
+    #topupOptions { margin-top:30px; }
     .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #333;
-      color: #fff;
-      padding: 10px 15px;
-      border-radius: 4px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-      z-index: 99999;
+      position:fixed; bottom:20px; right:20px; background:#333; color:#fff;
+      padding:10px 15px; border-radius:4px; opacity:0; pointer-events:none;
+      transition:opacity .3s; z-index:99999;
     }
-    .toast.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
+    .toast.show { opacity:1; pointer-events:auto; }
   </style>
 </head>
 <body>
   <div class="container">
 
-    <!-- ВЕРХНЯЯ СТРОКА (ссылка + кнопки) -->
+    <!-- ВЕРХНЯЯ СТРОКА -->
     <div class="top-row">
-      <!-- Основное поле ссылки -->
-      <input 
-        type="text" 
-        class="final-link-input" 
-        id="finalLink" 
-        placeholder="Тут будет итоговая ссылка" 
-        readonly
-      >
-      <!-- Кнопка выпадающего списка (последние ссылки) -->
-      <button class="last-links-toggle" id="lastLinksToggle" title="Последние ссылки">
-        ▼
-      </button>
-      <!-- Выпадающий список последних ссылок -->
+      <input type="text" id="finalLink" class="final-link-input" placeholder="Тут будет итоговая ссылка" readonly>
+      <button id="lastLinksToggle" class="last-links-toggle">▼</button>
       <ul id="lastLinksList" class="last-links-dropdown"></ul>
-
-      <!-- Иконка копирования -->
-      <button class="copy-icon-btn" id="copyLinkBtn" title="Скопировать ссылку">
-        <!-- Примерный SVG для копирования -->
-        <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button id="copyLinkBtn" class="copy-icon-btn" title="Скопировать ссылку">
+        <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 13H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
           <rect x="8" y="8" width="9" height="12" rx="2"/>
         </svg>
@@ -322,292 +93,176 @@
     <!-- Три колонки -->
     <div class="main-content">
 
-      <!-- Левая колонка: выбор типа ссылки -->
+      <!-- Левая: выбор типа ссылки -->
       <div class="left-col">
         <h2>Ссылка</h2>
-        <button class="link-type-btn selected" id="btnApp" data-type="app">Приложение</button>
-        <button class="link-type-btn" id="btnTopup" data-type="topup">Сайт Пополнение</button>
-        <button class="link-type-btn" id="btnCashout" data-type="cashout">Сайт Скупка</button>
+        <button id="btnApp"    class="link-type-btn selected" data-type="app">Приложение</button>
+        <button id="btnTopup"  class="link-type-btn" data-type="topup">Сайт Пополнение</button>
+        <button id="btnCashout"class="link-type-btn" data-type="cashout">Сайт Скупка</button>
+        <!-- Добавлена новая кнопка -->
+        <button id="btnHome"   class="link-type-btn" data-type="home">Сайт Главная страницу</button>
       </div>
 
-      <!-- Центральная колонка: UTM -->
+      <!-- Центральная: UTM -->
       <div class="center-col">
         <h2>UTM</h2>
-        <!-- UTM Source -->
         <div class="field-group">
           <label for="utmSource">UTM Source</label>
           <div class="input-with-dropdown">
-            <input type="text" id="utmSource" placeholder="Например tg_steamify" maxlength="50" />
-            <button class="dropdown-btn" data-field="source" type="button">▼</button>
+            <input type="text" id="utmSource" placeholder="Например tg_steamify" maxlength="50">
+            <button class="dropdown-btn" data-field="source">▼</button>
             <ul class="suggestions" data-suggest="source"></ul>
           </div>
         </div>
-        <!-- UTM Medium -->
         <div class="field-group">
           <label for="utmMedium">UTM Medium</label>
           <div class="input-with-dropdown">
-            <input type="text" id="utmMedium" placeholder="Например cpc" maxlength="50" />
-            <button class="dropdown-btn" data-field="medium" type="button">▼</button>
+            <input type="text" id="utmMedium" placeholder="Например cpc" maxlength="50">
+            <button class="dropdown-btn" data-field="medium">▼</button>
             <ul class="suggestions" data-suggest="medium"></ul>
           </div>
         </div>
-        <!-- UTM Campaign -->
         <div class="field-group">
           <label for="utmCampaign">UTM Campaign</label>
           <div class="input-with-dropdown">
-            <input type="text" id="utmCampaign" placeholder="Например 23Feb" maxlength="50" />
-            <button class="dropdown-btn" data-field="campaign" type="button">▼</button>
+            <input type="text" id="utmCampaign" placeholder="Например 23Feb" maxlength="50">
+            <button class="dropdown-btn" data-field="campaign">▼</button>
             <ul class="suggestions" data-suggest="campaign"></ul>
           </div>
         </div>
-        <!-- UTM Content -->
         <div class="field-group">
           <label for="utmContent">UTM Content</label>
           <div class="input-with-dropdown">
-            <input type="text" id="utmContent" placeholder="Например mem_260225" maxlength="50" />
-            <button class="dropdown-btn" data-field="content" type="button">▼</button>
+            <input type="text" id="utmContent" placeholder="Например mem_260225" maxlength="50">
+            <button class="dropdown-btn" data-field="content">▼</button>
             <ul class="suggestions" data-suggest="content"></ul>
           </div>
         </div>
-        <!-- UTM Lang (Ru/En) --> 
         <div class="field-group">
           <label>UTM Lang</label>
           <div class="radio-group" id="utmLangGroup">
-            <label>
-              <input type="radio" name="utmLangRadio" value="ru" checked>
-              Ru
-            </label>
-            <label>
-              <input type="radio" name="utmLangRadio" value="en">
-              En
-            </label>
+            <label><input type="radio" name="utmLangRadio" value="ru" checked>Ru</label>
+            <label><input type="radio" name="utmLangRadio" value="en">En</label>
           </div>
         </div>
       </div>
 
-      <!-- Правая колонка: сначала (Дополнительно для Приложения), затем (Дополнительно для Пополнения) -->
+      <!-- Правая: доп. блоки -->
       <div class="right-col">
-        <!-- Блок для Приложения -->
-        <div id="appOptions" style="opacity:1; pointer-events:auto;">
+        <div id="appOptions" style="opacity:1;pointer-events:auto;">
           <h2>Дополнительно для Приложения</h2>
-          <!-- Инвайт Код (макс 10 символов) -->
           <div class="field-group">
             <label for="inviteCode">Инвайт Код</label>
             <div class="input-with-dropdown">
-              <input 
-                type="text" 
-                id="inviteCode" 
-                placeholder="Реферальный код" 
-                maxlength="10"
-              />
-              <button class="dropdown-btn" data-field="invitecode" type="button">▼</button>
+              <input type="text" id="inviteCode" maxlength="10" placeholder="Реферальный код">
+              <button class="dropdown-btn" data-field="invitecode">▼</button>
               <ul class="suggestions" data-suggest="invitecode"></ul>
             </div>
           </div>
         </div>
-
-        <!-- Блок для Пополнения (ниже, с отступом) -->
-        <div id="topupOptions" style="opacity:0.3; pointer-events:none; margin-top:30px;">
+        <div id="topupOptions" style="opacity:0.3;pointer-events:none;margin-top:30px;">
           <h2>Дополнительно для Пополнения</h2>
-          <!-- Mode -->
           <div class="field-group">
             <label>Mode Пополнения</label>
             <div class="radio-group" id="modeGroup">
-              <label>
-                <input type="radio" name="modeRadio" value="login" checked>
-                Login
-              </label>
-              <label>
-                <input type="radio" name="modeRadio" value="skin">
-                Skin
-              </label>
+              <label><input type="radio" name="modeRadio" value="login" checked>Login</label>
+              <label><input type="radio" name="modeRadio" value="skin">Skin</label>
             </div>
           </div>
-          <!-- Промокод (макс 10 символов) -->
           <div class="field-group">
             <label for="promoCode">Промокод</label>
             <div class="input-with-dropdown">
-              <input type="text" id="promoCode" placeholder="Например SALE7" maxlength="10" />
-              <button class="dropdown-btn" data-field="promocode" type="button">▼</button>
+              <input type="text" id="promoCode" placeholder="Например SALE7" maxlength="10">
+              <button class="dropdown-btn" data-field="promocode">▼</button>
               <ul class="suggestions" data-suggest="promocode"></ul>
             </div>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 
   <!-- TOAST -->
   <div class="toast" id="toastMsg">Ссылка скопирована!</div>
 
   <script>
-    /* 
-      =====================
-      ЛОГИКА РАБОТЫ САЙТА
-      =====================
-    */
-
-    const STORAGE_KEY_POPULAR = 'utmPopularValues_v2'; 
+    /* ========== ЛОГИКА ========== */
+    const STORAGE_KEY_POPULAR = 'utmPopularValues_v2';
     const STORAGE_KEY_LASTLINKS = 'utmLastLinks_v2';
-
-    let popularValues = {
-      source: {},
-      medium: {},
-      campaign: {},
-      content: {},
-      promocode: {},
-      invitecode: {}
-    };
+    let popularValues = { source:{}, medium:{}, campaign:{}, content:{}, promocode:{}, invitecode:{} };
     let lastLinks = [];
-
-    // Текущий тип ссылки (app/topup/cashout)
     let currentLinkType = 'app';
 
     window.addEventListener('load', () => {
-      loadFromStorage();
+      try {
+        const p = localStorage.getItem(STORAGE_KEY_POPULAR);
+        if(p) popularValues = JSON.parse(p);
+        const l = localStorage.getItem(STORAGE_KEY_LASTLINKS);
+        if(l) lastLinks = JSON.parse(l);
+      } catch(e) { console.warn(e); }
       initEventListeners();
-
-      // При загрузке страницы смотрим, какой modeRadio выбран (login/skin)
-      const modeRadio = document.querySelector('input[name="modeRadio"]:checked');
-      if (modeRadio) {
-        onModeChange({ target: modeRadio }); // Применим состояние к промокоду
-      }
-
-      updateLink(); 
+      onModeChange({ target: document.querySelector('input[name="modeRadio"]:checked') });
+      updateLink();
     });
 
-    function loadFromStorage() {
-      try {
-        const storedPopular = localStorage.getItem(STORAGE_KEY_POPULAR);
-        if(storedPopular) popularValues = JSON.parse(storedPopular);
-
-        const storedLastLinks = localStorage.getItem(STORAGE_KEY_LASTLINKS);
-        if(storedLastLinks) lastLinks = JSON.parse(storedLastLinks);
-      } catch(e) {
-        console.warn("Ошибка чтения localStorage:", e);
-      }
-    }
-    function saveToStorage() {
-      try {
-        localStorage.setItem(STORAGE_KEY_POPULAR, JSON.stringify(popularValues));
-        localStorage.setItem(STORAGE_KEY_LASTLINKS, JSON.stringify(lastLinks));
-      } catch(e) {
-        console.warn("Ошибка записи localStorage:", e);
-      }
-    }
-
     function initEventListeners() {
-      // Кнопки выбора типа ссылки
-      document.getElementById('btnApp').addEventListener('click', onSelectLinkType);
-      document.getElementById('btnTopup').addEventListener('click', onSelectLinkType);
-      document.getElementById('btnCashout').addEventListener('click', onSelectLinkType);
-
-      // Поля UTM + inviteCode/promoCode
-      const utmFields = ['utmSource','utmMedium','utmCampaign','utmContent','promoCode','inviteCode'];
-      utmFields.forEach(id => {
-        const el = document.getElementById(id);
-        el.addEventListener('input', () => {
-          validateInput(el);
-          updateLink();
-        });
-      });
-
-      // Radio для языка
-      const langRadios = document.querySelectorAll('input[name="utmLangRadio"]');
-      langRadios.forEach(r => {
-        r.addEventListener('change', updateLink);
-      });
-
-      // Radio для mode (пополнение)
-      const modeRadios = document.querySelectorAll('input[name="modeRadio"]');
-      modeRadios.forEach(r => {
-        r.addEventListener('change', onModeChange);
-      });
-
-      // Кнопка копирования
-      document.getElementById('copyLinkBtn').addEventListener('click', copyLinkToClipboard);
-
-      // Кнопка раскрытия списка последних ссылок
-      document.getElementById('lastLinksToggle').addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleLastLinks();
-      });
-
-      // Закрываем выпадающие списки при клике вне
-      document.addEventListener('click', () => {
-        closeAllSuggestions();
-        closeLastLinks();
-      });
-
-      // Дропдауны подсказок (топ-10) 
-      const dropdownBtns = document.querySelectorAll('.dropdown-btn[data-field]');
-      dropdownBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation(); 
-          const field = btn.getAttribute('data-field');
-          showSuggestions(field);
-        });
-      });
+      ['btnApp','btnTopup','btnCashout','btnHome'].forEach(id =>
+        document.getElementById(id).addEventListener('click', onSelectLinkType)
+      );
+      ['utmSource','utmMedium','utmCampaign','utmContent','promoCode','inviteCode']
+        .forEach(id => document.getElementById(id)
+          .addEventListener('input', e => { validateInput(e.target); updateLink(); })
+        );
+      document.querySelectorAll('input[name="utmLangRadio"]')
+        .forEach(r => r.addEventListener('change', updateLink));
+      document.querySelectorAll('input[name="modeRadio"]')
+        .forEach(r => r.addEventListener('change', onModeChange));
+      document.getElementById('copyLinkBtn')
+        .addEventListener('click', copyLinkToClipboard);
+      document.getElementById('lastLinksToggle')
+        .addEventListener('click', e => { e.stopPropagation(); toggleLastLinks(); });
+      document.addEventListener('click', () => { closeAllSuggestions(); closeLastLinks(); });
+      document.querySelectorAll('.dropdown-btn[data-field]')
+        .forEach(btn => btn.addEventListener('click', e => {
+          e.stopPropagation();
+          showSuggestions(btn.getAttribute('data-field'));
+        }));
     }
 
-    /* Запрет на . / пробел и русские буквы */
     function validateInput(el) {
       el.value = el.value.replace(/[.\s\/а-яА-ЯёЁ]/g, '');
     }
 
     function onSelectLinkType(e) {
-      document.getElementById('btnApp').classList.remove('selected');
-      document.getElementById('btnTopup').classList.remove('selected');
-      document.getElementById('btnCashout').classList.remove('selected');
-
+      ['btnApp','btnTopup','btnCashout','btnHome'].forEach(id =>
+        document.getElementById(id).classList.remove('selected')
+      );
       e.currentTarget.classList.add('selected');
       currentLinkType = e.currentTarget.getAttribute('data-type');
-
       toggleAppOptions(currentLinkType);
       toggleTopupOptions(currentLinkType);
-
       updateLink();
     }
 
-    function toggleAppOptions(linkType) {
+    function toggleAppOptions(type) {
       const el = document.getElementById('appOptions');
-      if(linkType === 'app') {
-        el.style.opacity = '1';
-        el.style.pointerEvents = 'auto';
-      } else {
-        el.style.opacity = '0.3';
-        el.style.pointerEvents = 'none';
-      }
+      el.style.opacity = type==='app' ? '1' : '0.3';
+      el.style.pointerEvents = type==='app' ? 'auto' : 'none';
     }
-
-    function toggleTopupOptions(linkType) {
+    function toggleTopupOptions(type) {
       const el = document.getElementById('topupOptions');
-      if(linkType === 'topup') {
-        el.style.opacity = '1';
-        el.style.pointerEvents = 'auto';
-      } else {
-        el.style.opacity = '0.3';
-        el.style.pointerEvents = 'none';
-      }
+      el.style.opacity = type==='topup' ? '1' : '0.3';
+      el.style.pointerEvents = type==='topup' ? 'auto' : 'none';
     }
 
-    /* Меняем состояние поля промокода */
     function onModeChange(e) {
+      const promo = document.getElementById('promoCode');
+      if(e.target.value==='skin') { promo.disabled=true; promo.value=''; }
+      else { promo.disabled=false; }
       updateLink();
-      const modeVal = e.target.value; 
-      const promoEl = document.getElementById('promoCode');
-
-      if(modeVal === 'skin') {
-        // Отключаем поле промокода
-        promoEl.disabled = true;
-        promoEl.value = ''; 
-      } else {
-        // login -> включаем
-        promoEl.disabled = false;
-      }
     }
 
-    /* ====== ФОРМИРОВАНИЕ ССЫЛКИ ====== */
     function updateLink() {
       const sourceVal   = document.getElementById('utmSource').value.trim();
       const mediumVal   = document.getElementById('utmMedium').value.trim();
@@ -615,211 +270,143 @@
       const contentVal  = document.getElementById('utmContent').value.trim();
       const promoVal    = document.getElementById('promoCode').value.trim();
       const inviteVal   = document.getElementById('inviteCode').value.trim();
-
-      // Язык
-      let langVal = 'ru';
-      const langRadioChecked = document.querySelector('input[name="utmLangRadio"]:checked');
-      if(langRadioChecked) {
-        langVal = langRadioChecked.value;
-      }
-
-      // Mode (для пополнения)
-      let modeVal = 'login';
-      const modeRadioChecked = document.querySelector('input[name="modeRadio"]:checked');
-      if(modeRadioChecked) {
-        modeVal = modeRadioChecked.value;
-      }
+      const langVal     = document.querySelector('input[name="utmLangRadio"]:checked').value;
+      const modeVal     = document.querySelector('input[name="modeRadio"]:checked')?.value || 'login';
 
       let finalUrl = '';
+      let params = [];
 
-      /* 
-        При "Приложение" или "Сайт Скупка" всё как прежде.
-        При "Сайт Пополнение" смотрим, login => /topup, skin => /topup/skins.
-      */
       if(currentLinkType === 'app') {
         finalUrl = 'https://t.me/steamify_bot/app';
-
         let parts = [];
-        // Если есть invite, добавим первым
-        if(inviteVal)    parts.push(inviteVal);
-        if(sourceVal)    parts.push(`utm_source=${sourceVal}`);
-        if(mediumVal)    parts.push(`utm_medium=${mediumVal}`);
-        if(campaignVal)  parts.push(`utm_campaign=${campaignVal}`);
-        if(contentVal)   parts.push(`utm_content=${contentVal}`);
-        if(langVal)      parts.push(`utm_lang=${langVal}`);
-
-        if(parts.length > 0) {
-          finalUrl += '?startapp=' + parts.join('-');
-        }
+        if(inviteVal) parts.push(inviteVal);
+        if(sourceVal) parts.push(`utm_source=${sourceVal}`);
+        if(mediumVal) parts.push(`utm_medium=${mediumVal}`);
+        if(campaignVal) parts.push(`utm_campaign=${campaignVal}`);
+        if(contentVal) parts.push(`utm_content=${contentVal}`);
+        if(langVal) parts.push(`utm_lang=${langVal}`);
+        if(parts.length) finalUrl += '?startapp=' + parts.join('-');
       }
       else if(currentLinkType === 'topup') {
-        // Если mode=login => /topup
-        // Если mode=skin => /topup/skins
-        if(modeVal === 'skin') {
-          finalUrl = 'https://steamify.io/topup/skins';
-        } else {
-          finalUrl = 'https://steamify.io/topup';
-        }
-
-        // Остальные параметры идут ?promocode=...&utm_source=... и т.д.
-        let params = [];
-        if(promoVal)     params.push(`promocode=${promoVal}`);
-        if(sourceVal)    params.push(`utm_source=${sourceVal}`);
-        if(mediumVal)    params.push(`utm_medium=${mediumVal}`);
-        if(campaignVal)  params.push(`utm_campaign=${campaignVal}`);
-        if(contentVal)   params.push(`utm_content=${contentVal}`);
-        if(langVal)      params.push(`utm_lang=${langVal}`);
-
-        if(params.length > 0) {
-          finalUrl += '?' + params.join('&');
-        }
+        finalUrl = modeVal==='skin'
+          ? 'https://steamify.io/topup/skins'
+          : 'https://steamify.io/topup';
+        if(promoVal)    params.push(`promocode=${promoVal}`);
+        if(sourceVal)   params.push(`utm_source=${sourceVal}`);
+        if(mediumVal)   params.push(`utm_medium=${mediumVal}`);
+        if(campaignVal) params.push(`utm_campaign=${campaignVal}`);
+        if(contentVal)  params.push(`utm_content=${contentVal}`);
+        if(langVal)     params.push(`utm_lang=${langVal}`);
       }
       else if(currentLinkType === 'cashout') {
         finalUrl = 'https://steamify.io/cashout';
-        let params = [];
-        if(sourceVal)    params.push(`utm_source=${sourceVal}`);
-        if(mediumVal)    params.push(`utm_medium=${mediumVal}`);
-        if(campaignVal)  params.push(`utm_campaign=${campaignVal}`);
-        if(contentVal)   params.push(`utm_content=${contentVal}`);
-        if(langVal)      params.push(`utm_lang=${langVal}`);
+        if(sourceVal)   params.push(`utm_source=${sourceVal}`);
+        if(mediumVal)   params.push(`utm_medium=${mediumVal}`);
+        if(campaignVal) params.push(`utm_campaign=${campaignVal}`);
+        if(contentVal)  params.push(`utm_content=${contentVal}`);
+        if(langVal)     params.push(`utm_lang=${langVal}`);
+      }
+      else if(currentLinkType === 'home') {
+        finalUrl = 'https://steamify.io/';
+        if(sourceVal)   params.push(`utm_source=${sourceVal}`);
+        if(mediumVal)   params.push(`utm_medium=${mediumVal}`);
+        if(campaignVal) params.push(`utm_campaign=${campaignVal}`);
+        if(contentVal)  params.push(`utm_content=${contentVal}`);
+        if(langVal)     params.push(`utm_lang=${langVal}`);
+      }
 
-        if(params.length > 0) {
-          finalUrl += '?' + params.join('&');
-        }
+      if(params.length) {
+        finalUrl += (finalUrl.includes('?') ? '&' : '?') + params.join('&');
       }
 
       document.getElementById('finalLink').value = finalUrl;
     }
 
-    /* ====== КОПИРОВАНИЕ ССЫЛКИ ====== */
     function copyLinkToClipboard() {
       const link = document.getElementById('finalLink').value;
       if(!link) return;
       navigator.clipboard.writeText(link).then(() => {
         showToast("Ссылка скопирована!");
-        addLinkToHistory(link);
+        lastLinks.unshift(link);
+        if(lastLinks.length>10) lastLinks.length=10;
         updatePopularity();
         saveToStorage();
-      }).catch(() => {
-        alert("Не удалось скопировать ссылку автоматически.");
       });
     }
 
-    function addLinkToHistory(link) {
-      lastLinks.unshift(link);
-      if(lastLinks.length > 10) {
-        lastLinks.length = 10;
-      }
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY_POPULAR, JSON.stringify(popularValues));
+        localStorage.setItem(STORAGE_KEY_LASTLINKS, JSON.stringify(lastLinks));
+      } catch(e) { console.warn(e); }
     }
 
-    /* ====== ПОДСЧЁТ ПОПУЛЯРНОСТИ ====== */
     function updatePopularity() {
-      const sourceVal   = document.getElementById('utmSource').value.trim();
-      const mediumVal   = document.getElementById('utmMedium').value.trim();
-      const campaignVal = document.getElementById('utmCampaign').value.trim();
-      const contentVal  = document.getElementById('utmContent').value.trim();
-      const promoVal    = document.getElementById('promoCode').value.trim();
-      const inviteVal   = document.getElementById('inviteCode').value.trim();
-
-      incValueCount('source', sourceVal);
-      incValueCount('medium', mediumVal);
-      incValueCount('campaign', campaignVal);
-      incValueCount('content', contentVal);
-      incValueCount('promocode', promoVal);
-      incValueCount('invitecode', inviteVal);
-    }
-    function incValueCount(field, val) {
-      if(!val) return;
-      if(!popularValues[field]) {
-        popularValues[field] = {};
+      const map = {
+        source:'utmSource', medium:'utmMedium', campaign:'utmCampaign',
+        content:'utmContent', promocode:'promoCode', invitecode:'inviteCode'
+      };
+      for(let key in map) {
+        const val = document.getElementById(map[key]).value.trim();
+        if(!val) continue;
+        popularValues[key] = popularValues[key]||{};
+        popularValues[key][val] = (popularValues[key][val]||0) + 1;
       }
-      if(!popularValues[field][val]) {
-        popularValues[field][val] = 0;
-      }
-      popularValues[field][val]++;
     }
 
-    /* ====== ПОДСКАЗКИ (top-10) ====== */
     function showSuggestions(field) {
       closeAllSuggestions();
       const ul = document.querySelector(`.suggestions[data-suggest="${field}"]`);
       if(!ul) return;
-
-      const itemsObj = popularValues[field] || {};
-      let arr = Object.entries(itemsObj);
-      arr.sort((a,b) => b[1] - a[1]);
-      arr = arr.slice(0,10);
-
+      let entries = Object.entries(popularValues[field]||{})
+        .sort((a,b)=>b[1]-a[1]).slice(0,10);
       ul.innerHTML = '';
-      arr.forEach(([val, count]) => {
-        if(!val) return;
+      entries.forEach(([val])=>{
         const li = document.createElement('li');
-        li.textContent = val; 
-        li.addEventListener('click', (e) => {
-          e.stopPropagation();
-          setFieldValue(field, val);
-          closeAllSuggestions();
+        li.textContent = val;
+        li.addEventListener('click', e=>{
+          document.getElementById({
+            source:'utmSource', medium:'utmMedium', campaign:'utmCampaign',
+            content:'utmContent', promocode:'promoCode', invitecode:'inviteCode'
+          }[field]).value = val;
           updateLink();
+          closeAllSuggestions();
         });
         ul.appendChild(li);
       });
-      if(arr.length > 0) ul.style.display = 'block';
-    }
-    function closeAllSuggestions() {
-      const allSug = document.querySelectorAll('.suggestions');
-      allSug.forEach(s => s.style.display = 'none');
-    }
-    function setFieldValue(field, val) {
-      switch(field) {
-        case 'source':     document.getElementById('utmSource').value = val; break;
-        case 'medium':     document.getElementById('utmMedium').value = val; break;
-        case 'campaign':   document.getElementById('utmCampaign').value = val; break;
-        case 'content':    document.getElementById('utmContent').value = val; break;
-        case 'promocode':  document.getElementById('promoCode').value = val; break;
-        case 'invitecode': document.getElementById('inviteCode').value = val; break;
-      }
-      updateLink();
+      if(entries.length) ul.style.display = 'block';
     }
 
-    /* ====== СПИСОК ПОСЛЕДНИХ ССЫЛОК (top-10) ====== */
+    function closeAllSuggestions() {
+      document.querySelectorAll('.suggestions').forEach(s=>s.style.display='none');
+    }
+
     function toggleLastLinks() {
-      const listEl = document.getElementById('lastLinksList');
-      if(listEl.style.display === 'block') {
-        listEl.style.display = 'none';
-      } else {
-        renderLastLinks();
-        listEl.style.display = 'block';
-      }
+      const el = document.getElementById('lastLinksList');
+      el.style.display = el.style.display==='block'?'none':'block';
+      if(el.style.display==='block') renderLastLinks();
     }
     function renderLastLinks() {
-      const listEl = document.getElementById('lastLinksList');
-      listEl.innerHTML = '';
-      lastLinks.forEach(link => {
+      const ul = document.getElementById('lastLinksList');
+      ul.innerHTML = '';
+      lastLinks.forEach(link=>{
         const li = document.createElement('li');
         li.textContent = link;
-        li.addEventListener('click', (e) => {
-          e.stopPropagation();
-          navigator.clipboard.writeText(link).then(() => {
-            showToast("Ссылка скопирована из истории!");
-          });
-          closeLastLinks();
+        li.addEventListener('click', e=>{
+          navigator.clipboard.writeText(link).then(()=>showToast("Ссылка скопирована из истории!"));
         });
-        listEl.appendChild(li);
+        ul.appendChild(li);
       });
     }
     function closeLastLinks() {
-      const listEl = document.getElementById('lastLinksList');
-      listEl.style.display = 'none';
+      document.getElementById('lastLinksList').style.display='none';
     }
 
-    /* ====== TOAST-УВЕДОМЛЕНИЕ ====== */
     function showToast(msg) {
-      const toast = document.getElementById('toastMsg');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2000);
+      const t = document.getElementById('toastMsg');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'),2000);
     }
   </script>
 </body>
