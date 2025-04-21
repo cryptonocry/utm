@@ -2,183 +2,362 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Генератор UTM‑ссылок</title>
+  <title>Генератор UTM-ссылок</title>
   <style>
     /* ====== Общие стили ====== */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #1E1E1E; color: #F0F0F0; font-family: Arial, sans-serif; line-height: 1.4; }
-    .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    * {
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #1E1E1E;
+      color: #F0F0F0;
+      font-family: 'Arial', sans-serif; 
+      line-height: 1.4;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-    /* ====== Верхняя строка ====== */
-    .top-row { display: flex; align-items: center; position: relative; margin-bottom: 40px; }
+    /* ====== ВЕРХНЯЯ СТРОКА: Поле ссылки и кнопки копирования ====== */
+    .top-row {
+      display: flex;
+      align-items: center;
+      position: relative;
+      margin-bottom: 40px;
+    }
     .final-link-input {
-      flex: 1.2; padding: 14px 16px; background: #2C2C2C; border: 1px solid #3C3C3C;
-      border-radius: 8px; color: #F0F0F0; font-size: 13px; outline: none;
+      flex: 1.2;
+      padding: 14px 16px;
+      background-color: #2C2C2C;
+      border: 1px solid #3C3C3C;
+      border-radius: 8px;
+      color: #F0F0F0;
+      font-size: 13px;
+      outline: none;
     }
-    .final-link-input::placeholder { color: #777; }
-    .copy-icon-btn, .last-links-toggle {
-      width: 40px; height: 40px; background: none; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+    .final-link-input::placeholder {
+      color: #777;
     }
-    .copy-icon-btn:hover svg path { stroke: #aaa; }
-    .last-links-toggle:hover { opacity: .8; }
+    .copy-icon-btn {
+      width: 40px;
+      height: 40px;
+      background: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      margin-left: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .copy-icon-btn:hover svg path {
+      stroke: #aaa;
+    }
     .last-links-dropdown {
-      position: absolute; top: 60px; left: 0; right: 60px; background: #2C2C2C;
-      border: 1px solid #3C3C3C; border-radius: 8px; display: none; z-index: 9999;
-      max-height: 200px; overflow-y: auto; padding: 6px 0;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      right: 60px;
+      background-color: #2C2C2C;
+      border: 1px solid #3C3C3C;
+      border-radius: 8px;
+      display: none;
+      z-index: 9999;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 6px 0;
     }
     .last-links-dropdown li {
-      padding: 8px 16px; font-size: 13px; border-bottom: 1px solid #3C3C3C;
-      word-break: break-all; cursor: pointer; color: #A0CFFF;
+      padding: 8px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid #3C3C3C;
+      word-break: break-all;
+      cursor: pointer;
+      color: #A0CFFF; 
     }
-    .last-links-dropdown li:hover { background: #3C3C3C; }
+    .last-links-dropdown li:hover {
+      background-color: #3C3C3C;
+    }
+    .last-links-toggle {
+      position: absolute;
+      right: 48px;
+      top: 0;
+      bottom: 0;
+      width: 40px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .last-links-toggle:hover {
+      opacity: 0.8;
+    }
 
-    /* ====== Основной контент ====== */
-    .main-content { display: flex; gap: 80px; }
-
-    /* Левая колонка */
-    .left-col { display: flex; flex-direction: column; gap: 20px; min-width: 180px; }
-    .left-col h2 { font-size: 16px; color: #aaa; margin-bottom: 12px; }
+    /* ====== ОСНОВНОЙ КОНТЕНТ ====== */
+    .main-content {
+      display: flex;
+      gap: 80px; 
+    }
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 180px;
+    }
+    .left-col h2 {
+      font-size: 16px;
+      font-weight: normal;
+      margin-bottom: 12px;
+      color: #aaa;
+    }
     .link-type-btn {
-      background: #2C2C2C; border: 1px solid #3C3C3C; border-radius: 8px;
-      padding: 12px 16px; color: #F0F0F0; text-align: left; cursor: pointer;
-      transition: border-color .2s;
+      background-color: #2C2C2C;
+      border: 1px solid #3C3C3C;
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #F0F0F0;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
     }
-    .link-type-btn:hover { border-color: #555; }
-    .link-type-btn.selected { border-color: #AAA; }
-
-    /* Центральная колонка */
-    .center-col { display: flex; flex-direction: column; gap: 20px; }
-    .center-col h2 { font-size: 16px; color: #aaa; margin-bottom: 12px; }
-
-    /* Правая колонка */
-    .right-col { display: flex; flex-direction: column; gap: 20px; min-width: 220px; }
-    .right-col h2 { font-size: 16px; color: #aaa; margin-bottom: 12px; }
-
-    /* Поля */
-    .field-group { display: flex; flex-direction: column; gap: 6px; }
-    .field-group label { font-size: 14px; color: #aaa; }
-    .field-group input[type="text"], .field-group select {
-      padding: 10px; background: #2C2C2C; border: 1px solid #3C3C3C;
-      border-radius: 6px; color: #F0F0F0; font-size: 14px; outline: none;
+    .link-type-btn:hover {
+      border-color: #555;
     }
-    .field-group input::placeholder { color: #777; }
-    .field-group input:disabled { background: #444; cursor: not-allowed; opacity: .6; }
+    .link-type-btn.selected {
+      border-color: #AAA; 
+    }
 
-    /* Дропдаун */
-    .input-with-dropdown { position: relative; }
+    .center-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .center-col h2 {
+      font-size: 16px;
+      font-weight: normal;
+      margin-bottom: 12px;
+      color: #aaa;
+    }
+
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 220px;
+    }
+    .right-col h2 {
+      font-size: 16px;
+      font-weight: normal;
+      margin-bottom: 12px;
+      color: #aaa;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field-group label {
+      font-size: 14px;
+      color: #aaa;
+    }
+    .field-group input[type="text"],
+    .field-group select {
+      padding: 10px;
+      background-color: #2C2C2C;
+      border: 1px solid #3C3C3C;
+      border-radius: 6px;
+      color: #F0F0F0;
+      font-size: 14px;
+      outline: none;
+    }
+    .field-group input[type="text"]::placeholder {
+      color: #777;
+    }
+    .field-group input[type="text"]:disabled {
+      background-color: #444; 
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     .dropdown-btn {
-      position: absolute; right: 2px; top: 2px; bottom: 2px; width: 30px;
-      background: none; border: none; cursor: pointer; color: #fff;
+      position: absolute;
+      right: 2px;
+      top: 2px;
+      bottom: 2px;
+      width: 30px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #fff;
     }
     .suggestions {
-      position: absolute; top: 44px; left: 0; right: 0; background: #2C2C2C;
-      border: 1px solid #3C3C3C; border-radius: 6px; z-index: 9999;
-      max-height: 200px; overflow-y: auto; display: none;
+      position: absolute;
+      top: 44px;
+      left: 0;
+      right: 0;
+      background-color: #2C2C2C;
+      border: 1px solid #3C3C3C;
+      border-radius: 6px;
+      z-index: 9999;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      list-style: none;
+      margin: 0;
+      padding: 0;
     }
     .suggestions li {
-      padding: 8px 12px; border-bottom: 1px solid #3C3C3C; cursor: pointer;
-    }
-    .suggestions li:hover { background: #3C3C3C; }
-
-    /* Радио‑кнопки */
-    .radio-group { display: flex; gap: 20px; margin-bottom: 10px; }
-    .radio-group label {
-      display: flex; align-items: center; gap: 12px; /* увеличенный отступ */
+      padding: 8px 12px;
+      border-bottom: 1px solid #3C3C3C;
       cursor: pointer;
     }
-    .radio-group input[type="radio"] { accent-color: #555; transform: scale(1.3); }
+    .suggestions li:hover {
+      background-color: #3C3C3C;
+    }
 
-    #topupOptions { margin-top: 30px; }
+    .input-with-dropdown {
+      position: relative;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .radio-group input[type="radio"] {
+      accent-color: #555; 
+      transform: scale(1.3); 
+    }
+
+    #topupOptions {
+      margin-top: 30px;
+    }
 
     .toast {
-      position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff;
-      padding: 10px 15px; border-radius: 4px; opacity: 0; pointer-events: none;
-      transition: opacity .3s; z-index: 99999;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 4px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 99999;
     }
-    .toast.show { opacity: 1; pointer-events: auto; }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Верхняя строка -->
+
+    <!-- ВЕРХНЯЯ СТРОКА (ссылка + кнопки) -->
     <div class="top-row">
-      <input id="finalLink" class="final-link-input" placeholder="Тут будет итоговая ссылка" readonly>
-      <button id="lastLinksToggle" class="last-links-toggle">▼</button>
+      <input 
+        type="text" 
+        class="final-link-input" 
+        id="finalLink" 
+        placeholder="Тут будет итоговая ссылка" 
+        readonly
+      >
+      <button class="last-links-toggle" id="lastLinksToggle" title="Последние ссылки">
+        ▼
+      </button>
       <ul id="lastLinksList" class="last-links-dropdown"></ul>
-      <button id="copyLinkBtn" class="copy-icon-btn" title="Скопировать ссылку">
-        <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
+      <button class="copy-icon-btn" id="copyLinkBtn" title="Скопировать ссылку">
+        <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 13H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
           <rect x="8" y="8" width="9" height="12" rx="2"/>
         </svg>
       </button>
     </div>
 
-    <!-- Основной контент -->
+    <!-- Три колонки -->
     <div class="main-content">
-      <!-- Левая -->
+
+      <!-- Левая колонка: выбор типа ссылки -->
       <div class="left-col">
         <h2>Ссылка</h2>
-        <button id="btnApp"    class="link-type-btn selected" data-type="app">Приложение</button>
-        <button id="btnTopup"  class="link-type-btn"         data-type="topup">Сайт Пополнение</button>
-        <button id="btnCashout"class="link-type-btn"         data-type="cashout">Сайт Скупка</button>
-        <button id="btnHome"   class="link-type-btn"         data-type="home">Сайт Главная страницу</button>
+        <button class="link-type-btn selected" id="btnApp"     data-type="app">Приложение</button>
+        <button class="link-type-btn"           id="btnTopup"  data-type="topup">Сайт Пополнение</button>
+        <button class="link-type-btn"           id="btnCashout"data-type="cashout">Сайт Скупка</button>
+        <button class="link-type-btn"           id="btnHome"   data-type="home">Сайт Главная стр.</button>
       </div>
 
-      <!-- Центр -->
+      <!-- Центральная колонка: UTM -->
       <div class="center-col">
         <h2>UTM</h2>
         <div class="field-group">
           <label for="utmSource">UTM Source</label>
           <div class="input-with-dropdown">
-            <input id="utmSource" maxlength="50" placeholder="Например tg_steamify">
-            <button class="dropdown-btn" data-field="source">▼</button>
+            <input type="text" id="utmSource" placeholder="Например tg_steamify" maxlength="50" />
+            <button class="dropdown-btn" data-field="source" type="button">▼</button>
             <ul class="suggestions" data-suggest="source"></ul>
           </div>
         </div>
         <div class="field-group">
           <label for="utmMedium">UTM Medium</label>
           <div class="input-with-dropdown">
-            <input id="utmMedium" maxlength="50" placeholder="Например cpc">
-            <button class="dropdown-btn" data-field="medium">▼</button>
+            <input type="text" id="utmMedium" placeholder="Например cpc" maxlength="50" />
+            <button class="dropdown-btn" data-field="medium" type="button">▼</button>
             <ul class="suggestions" data-suggest="medium"></ul>
           </div>
         </div>
         <div class="field-group">
           <label for="utmCampaign">UTM Campaign</label>
           <div class="input-with-dropdown">
-            <input id="utmCampaign" maxlength="50" placeholder="Например 23Feb">
-            <button class="dropdown-btn" data-field="campaign">▼</button>
+            <input type="text" id="utmCampaign" placeholder="Например 23Feb" maxlength="50" />
+            <button class="dropdown-btn" data-field="campaign" type="button">▼</button>
             <ul class="suggestions" data-suggest="campaign"></ul>
           </div>
         </div>
         <div class="field-group">
           <label for="utmContent">UTM Content</label>
           <div class="input-with-dropdown">
-            <input id="utmContent" maxlength="50" placeholder="Например mem_260225">
-            <button class="dropdown-btn" data-field="content">▼</button>
+            <input type="text" id="utmContent" placeholder="Например mem_260225" maxlength="50" />
+            <button class="dropdown-btn" data-field="content" type="button">▼</button>
             <ul class="suggestions" data-suggest="content"></ul>
           </div>
         </div>
         <div class="field-group">
           <label>UTM Lang</label>
-          <div class="radio-group">
-            <label><input type="radio" name="utmLangRadio" value="ru" checked>Ru</label>
-            <label><input type="radio" name="utmLangRadio" value="en">En</label>
+          <div class="radio-group" id="utmLangGroup">
+            <label><input type="radio" name="utmLangRadio" value="ru" checked> Ru</label>
+            <label><input type="radio" name="utmLangRadio" value="en"> En</label>
           </div>
         </div>
       </div>
 
-      <!-- Правая -->
+      <!-- Правая колонка: доп. блоки -->
       <div class="right-col">
         <div id="appOptions" style="opacity:1; pointer-events:auto;">
           <h2>Дополнительно для Приложения</h2>
           <div class="field-group">
             <label for="inviteCode">Инвайт Код</label>
             <div class="input-with-dropdown">
-              <input id="inviteCode" maxlength="10" placeholder="Реферальный код">
-              <button class="dropdown-btn" data-field="invitecode">▼</button>
+              <input type="text" id="inviteCode" placeholder="Реферальный код" maxlength="10"/>
+              <button class="dropdown-btn" data-field="invitecode" type="button">▼</button>
               <ul class="suggestions" data-suggest="invitecode"></ul>
             </div>
           </div>
@@ -187,78 +366,79 @@
           <h2>Дополнительно для Пополнения</h2>
           <div class="field-group">
             <label>Mode Пополнения</label>
-            <div class="radio-group">
-              <label><input type="radio" name="modeRadio" value="login" checked>Login</label>
-              <label><input type="radio" name="modeRadio" value="skin">Skin</label>
+            <div class="radio-group" id="modeGroup">
+              <label><input type="radio" name="modeRadio" value="login" checked> Login</label>
+              <label><input type="radio" name="modeRadio" value="skin"> Skin</label>
             </div>
           </div>
           <div class="field-group">
             <label for="promoCode">Промокод</label>
             <div class="input-with-dropdown">
-              <input id="promoCode" maxlength="10" placeholder="Например SALE7">
-              <button class="dropdown-btn" data-field="promocode">▼</button>
+              <input type="text" id="promoCode" placeholder="Например SALE7" maxlength="10"/>
+              <button class="dropdown-btn" data-field="promocode" type="button">▼</button>
               <ul class="suggestions" data-suggest="promocode"></ul>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
-  <!-- Toast -->
-  <div id="toastMsg" class="toast">Ссылка скопирована!</div>
+  <div class="toast" id="toastMsg">Ссылка скопирована!</div>
 
   <script>
-    const STORAGE_KEY_POPULAR = 'utmPopularValues_v2';
+    const STORAGE_KEY_POPULAR = 'utmPopularValues_v2'; 
     const STORAGE_KEY_LASTLINKS = 'utmLastLinks_v2';
+
     let popularValues = { source:{}, medium:{}, campaign:{}, content:{}, promocode:{}, invitecode:{} };
     let lastLinks = [];
     let currentLinkType = 'app';
 
     window.addEventListener('load', () => {
-      try {
-        const p = localStorage.getItem(STORAGE_KEY_POPULAR);
-        if (p) popularValues = JSON.parse(p);
-        const l = localStorage.getItem(STORAGE_KEY_LASTLINKS);
-        if (l) lastLinks = JSON.parse(l);
-      } catch(e) { console.warn(e); }
-
+      loadFromStorage();
       initEventListeners();
-      onModeChange({ target: document.querySelector('input[name="modeRadio"]:checked') });
+      const modeRadio = document.querySelector('input[name="modeRadio"]:checked');
+      if (modeRadio) onModeChange({ target: modeRadio });
       updateLink();
     });
 
+    function loadFromStorage() {
+      try {
+        const sp = localStorage.getItem(STORAGE_KEY_POPULAR);
+        if (sp) popularValues = JSON.parse(sp);
+        const sl = localStorage.getItem(STORAGE_KEY_LASTLINKS);
+        if (sl) lastLinks = JSON.parse(sl);
+      } catch(e){ console.warn(e); }
+    }
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY_POPULAR, JSON.stringify(popularValues));
+        localStorage.setItem(STORAGE_KEY_LASTLINKS, JSON.stringify(lastLinks));
+      } catch(e){ console.warn(e); }
+    }
+
     function initEventListeners() {
-      ['btnApp','btnTopup','btnCashout','btnHome']
-        .forEach(id => document.getElementById(id).addEventListener('click', onSelectLinkType));
+      ['btnApp','btnTopup','btnCashout','btnHome'].forEach(id => {
+        document.getElementById(id).addEventListener('click', onSelectLinkType);
+      });
 
       ['utmSource','utmMedium','utmCampaign','utmContent','promoCode','inviteCode']
-        .forEach(id => document.getElementById(id).addEventListener('input', e => {
-          validateInput(e.target);
-          updateLink();
-        }));
+        .forEach(id => {
+          const el = document.getElementById(id);
+          el.addEventListener('input', () => { validateInput(el); updateLink(); });
+        });
 
-      document.querySelectorAll('input[name="utmLangRadio"]')
-        .forEach(r => r.addEventListener('change', updateLink));
-
-      document.querySelectorAll('input[name="modeRadio"]')
-        .forEach(r => r.addEventListener('change', onModeChange));
+      document.querySelectorAll('input[name="utmLangRadio"]').forEach(r => r.addEventListener('change', updateLink));
+      document.querySelectorAll('input[name="modeRadio"]').forEach(r => r.addEventListener('change', onModeChange));
 
       document.getElementById('copyLinkBtn').addEventListener('click', copyLinkToClipboard);
-      document.getElementById('lastLinksToggle').addEventListener('click', e => {
-        e.stopPropagation();
-        toggleLastLinks();
-      });
-      document.addEventListener('click', () => {
-        closeAllSuggestions();
-        closeLastLinks();
-      });
+      document.getElementById('lastLinksToggle').addEventListener('click', e => { e.stopPropagation(); toggleLastLinks(); });
+      document.addEventListener('click', () => { closeAllSuggestions(); closeLastLinks(); });
 
-      document.querySelectorAll('.dropdown-btn[data-field]')
-        .forEach(btn => btn.addEventListener('click', e => {
-          e.stopPropagation();
-          showSuggestions(btn.dataset.field);
-        }));
+      document.querySelectorAll('.dropdown-btn[data-field]').forEach(btn => {
+        btn.addEventListener('click', e => { e.stopPropagation(); showSuggestions(btn.dataset.field); });
+      });
     }
 
     function validateInput(el) {
@@ -266,8 +446,9 @@
     }
 
     function onSelectLinkType(e) {
-      ['btnApp','btnTopup','btnCashout','btnHome']
-        .forEach(id => document.getElementById(id).classList.remove('selected'));
+      ['btnApp','btnTopup','btnCashout','btnHome'].forEach(id =>
+        document.getElementById(id).classList.remove('selected')
+      );
       e.currentTarget.classList.add('selected');
       currentLinkType = e.currentTarget.dataset.type;
       toggleAppOptions(currentLinkType);
@@ -277,80 +458,75 @@
 
     function toggleAppOptions(type) {
       const el = document.getElementById('appOptions');
-      el.style.opacity = type==='app' ? '1' : '0.3';
-      el.style.pointerEvents = type==='app' ? 'auto' : 'none';
+      el.style.opacity = (type==='app'? '1':'0.3');
+      el.style.pointerEvents = (type==='app'? 'auto':'none');
     }
     function toggleTopupOptions(type) {
       const el = document.getElementById('topupOptions');
-      el.style.opacity = type==='topup' ? '1' : '0.3';
-      el.style.pointerEvents = type==='topup' ? 'auto' : 'none';
+      el.style.opacity = (type==='topup'? '1':'0.3');
+      el.style.pointerEvents = (type==='topup'? 'auto':'none');
     }
 
     function onModeChange(e) {
-      const promo = document.getElementById('promoCode');
-      if (e.target.value==='skin') {
-        promo.disabled = true;
-        promo.value = '';
-      } else {
-        promo.disabled = false;
-      }
       updateLink();
+      const promo = document.getElementById('promoCode');
+      if (e.target.value==='skin') { promo.disabled=true; promo.value=''; }
+      else { promo.disabled=false; }
     }
 
     function updateLink() {
-      const src = document.getElementById('utmSource').value.trim();
-      const med = document.getElementById('utmMedium').value.trim();
-      const cmp = document.getElementById('utmCampaign').value.trim();
-      const cnt = document.getElementById('utmContent').value.trim();
-      const prm = document.getElementById('promoCode').value.trim();
-      const inv = document.getElementById('inviteCode').value.trim();
+      const s = document.getElementById('utmSource').value.trim();
+      const m = document.getElementById('utmMedium').value.trim();
+      const c = document.getElementById('utmCampaign').value.trim();
+      const t = document.getElementById('utmContent').value.trim();
+      const p = document.getElementById('promoCode').value.trim();
+      const i = document.getElementById('inviteCode').value.trim();
       const lang = document.querySelector('input[name="utmLangRadio"]:checked').value;
-      const mode = document.querySelector('input[name="modeRadio"]:checked')?.value || 'login';
+      const mode = document.querySelector('input[name="modeRadio"]:checked').value;
 
       let url = '';
-      let params = [];
 
       if (currentLinkType==='app') {
         url = 'https://t.me/steamify_bot/app';
         const parts = [];
-        if (inv) parts.push(inv);
-        if (src) parts.push(`utm_source=${src}`);
-        if (med) parts.push(`utm_medium=${med}`);
-        if (cmp) parts.push(`utm_campaign=${cmp}`);
-        if (cnt) parts.push(`utm_content=${cnt}`);
+        if (i) parts.push(i);
+        if (s) parts.push(`utm_source=${s}`);
+        if (m) parts.push(`utm_medium=${m}`);
+        if (c) parts.push(`utm_campaign=${c}`);
+        if (t) parts.push(`utm_content=${t}`);
         if (lang) parts.push(`utm_lang=${lang}`);
         if (parts.length) url += '?startapp=' + parts.join('-');
       }
       else if (currentLinkType==='topup') {
-        url = mode==='skin'
-          ? 'https://steamify.io/topup/skins'
-          : 'https://steamify.io/topup';
-        if (prm) params.push(`promocode=${prm}`);
-        if (src) params.push(`utm_source=${src}`);
-        if (med) params.push(`utm_medium=${med}`);
-        if (cmp) params.push(`utm_campaign=${cmp}`);
-        if (cnt) params.push(`utm_content=${cnt}`);
-        if (lang) params.push(`utm_lang=${lang}`);
+        url = (mode==='skin' ? 'https://steamify.io/topup/skins' : 'https://steamify.io/topup');
+        const pr = [];
+        if (p) pr.push(`promocode=${p}`);
+        if (s) pr.push(`utm_source=${s}`);
+        if (m) pr.push(`utm_medium=${m}`);
+        if (c) pr.push(`utm_campaign=${c}`);
+        if (t) pr.push(`utm_content=${t}`);
+        if (lang) pr.push(`utm_lang=${lang}`);
+        if (pr.length) url += '?' + pr.join('&');
       }
       else if (currentLinkType==='cashout') {
         url = 'https://steamify.io/cashout';
-        if (src) params.push(`utm_source=${src}`);
-        if (med) params.push(`utm_medium=${med}`);
-        if (cmp) params.push(`utm_campaign=${cmp}`);
-        if (cnt) params.push(`utm_content=${cnt}`);
-        if (lang) params.push(`utm_lang=${lang}`);
+        const pr = [];
+        if (s) pr.push(`utm_source=${s}`);
+        if (m) pr.push(`utm_medium=${m}`);
+        if (c) pr.push(`utm_campaign=${c}`);
+        if (t) pr.push(`utm_content=${t}`);
+        if (lang) pr.push(`utm_lang=${lang}`);
+        if (pr.length) url += '?' + pr.join('&');
       }
       else if (currentLinkType==='home') {
         url = 'https://steamify.io/';
-        if (src) params.push(`utm_source=${src}`);
-        if (med) params.push(`utm_medium=${med}`);
-        if (cmp) params.push(`utm_campaign=${cmp}`);
-        if (cnt) params.push(`utm_content=${cnt}`);
-        if (lang) params.push(`utm_lang=${lang}`);
-      }
-
-      if (params.length) {
-        url += (url.includes('?') ? '&' : '?') + params.join('&');
+        const pr = [];
+        if (s) pr.push(`utm_source=${s}`);
+        if (m) pr.push(`utm_medium=${m}`);
+        if (c) pr.push(`utm_campaign=${c}`);
+        if (t) pr.push(`utm_content=${t}`);
+        pr.push(`utm_lang=${lang}`);
+        if (pr.length) url += '?' + pr.join('&');
       }
 
       document.getElementById('finalLink').value = url;
@@ -361,80 +537,77 @@
       if (!link) return;
       navigator.clipboard.writeText(link).then(() => {
         showToast("Ссылка скопирована!");
-        lastLinks.unshift(link);
-        if (lastLinks.length>10) lastLinks.length=10;
+        addLinkToHistory(link);
         updatePopularity();
         saveToStorage();
+      }).catch(() => {
+        alert("Не удалось скопировать ссылку автоматически.");
       });
     }
 
-    function saveToStorage() {
-      try {
-        localStorage.setItem(STORAGE_KEY_POPULAR, JSON.stringify(popularValues));
-        localStorage.setItem(STORAGE_KEY_LASTLINKS, JSON.stringify(lastLinks));
-      } catch(e) { console.warn(e); }
+    function addLinkToHistory(link) {
+      lastLinks.unshift(link);
+      if (lastLinks.length>10) lastLinks.length=10;
     }
-
     function updatePopularity() {
-      const map = {
-        source:'utmSource', medium:'utmMedium', campaign:'utmCampaign',
-        content:'utmContent', promocode:'promoCode', invitecode:'inviteCode'
-      };
-      for (let key in map) {
-        const v = document.getElementById(map[key]).value.trim();
-        if (!v) continue;
-        popularValues[key] = popularValues[key]||{};
-        popularValues[key][v] = (popularValues[key][v]||0) + 1;
-      }
+      ['source','medium','campaign','content','promocode','invitecode']
+        .forEach(field => {
+          const val = field==='invitecode'
+            ? document.getElementById('inviteCode').value.trim()
+            : field==='promocode'
+              ? document.getElementById('promoCode').value.trim()
+              : document.getElementById('utm'+field.charAt(0).toUpperCase()+field.slice(1)).value.trim();
+          if (!val) return;
+          popularValues[field][val] = (popularValues[field][val]||0)+1;
+        });
     }
 
     function showSuggestions(field) {
       closeAllSuggestions();
       const ul = document.querySelector(`.suggestions[data-suggest="${field}"]`);
-      if (!ul) return;
-      const list = Object.entries(popularValues[field]||{})
+      const items = Object.entries(popularValues[field]||{})
         .sort((a,b)=>b[1]-a[1]).slice(0,10);
       ul.innerHTML = '';
-      list.forEach(([val])=>{
-        const li = document.createElement('li');
-        li.textContent = val;
-        li.addEventListener('click', ()=>{
-          document.getElementById({
-            source:'utmSource', medium:'utmMedium', campaign:'utmCampaign',
-            content:'utmContent', promocode:'promoCode', invitecode:'inviteCode'
-          }[field]).value = val;
-          updateLink();
+      items.forEach(([val])=>{
+        const li = document.createElement('li'); li.textContent = val;
+        li.addEventListener('click', e => {
+          e.stopPropagation();
+          const idMap = {
+            source:'utmSource', medium:'utmMedium',
+            campaign:'utmCampaign', content:'utmContent',
+            promocode:'promoCode', invitecode:'inviteCode'
+          };
+          document.getElementById(idMap[field]).value = val;
           closeAllSuggestions();
+          updateLink();
         });
         ul.appendChild(li);
       });
-      if (list.length) ul.style.display = 'block';
+      if (items.length) ul.style.display='block';
     }
-
     function closeAllSuggestions() {
-      document.querySelectorAll('.suggestions').forEach(s=>s.style.display='none');
+      document.querySelectorAll('.suggestions').forEach(u=>u.style.display='none');
     }
 
     function toggleLastLinks() {
-      const el = document.getElementById('lastLinksList');
-      el.style.display = el.style.display==='block' ? 'none' : 'block';
-      if (el.style.display==='block') renderLastLinks();
+      const list = document.getElementById('lastLinksList');
+      if (list.style.display==='block') list.style.display='none';
+      else { renderLastLinks(); list.style.display='block'; }
     }
-
     function renderLastLinks() {
-      const ul = document.getElementById('lastLinksList');
-      ul.innerHTML = '';
+      const list = document.getElementById('lastLinksList');
+      list.innerHTML = '';
       lastLinks.forEach(link=>{
         const li = document.createElement('li');
         li.textContent = link;
-        li.addEventListener('click', ()=>{
-          navigator.clipboard.writeText(link)
-            .then(()=>showToast("Ссылка скопирована из истории!"));
+        li.addEventListener('click', e=>{
+          e.stopPropagation();
+          navigator.clipboard.writeText(link).then(()=> showToast("Ссылка скопирована из истории!"));
+          closeLastLinks();
         });
-        ul.appendChild(li);
+        list.appendChild(li);
       });
     }
-
     function closeLastLinks() {
       document.getElementById('lastLinksList').style.display='none';
     }
@@ -443,7 +616,7 @@
       const t = document.getElementById('toastMsg');
       t.textContent = msg;
       t.classList.add('show');
-      setTimeout(()=>t.classList.remove('show'),2000);
+      setTimeout(()=> t.classList.remove('show'), 2000);
     }
   </script>
 </body>
