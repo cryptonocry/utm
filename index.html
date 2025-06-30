@@ -330,7 +330,7 @@
         finalUrl = 'https://t.me/steamify_bot/app';
         const parts = [];
         if (inviteVal) parts.push(inviteVal);
-        if (sourceVal) parts.push(`utm_source=${sourceVal}`);
+        if (sourceVal) parts.push(`utm_source=${sourceVal}`);  
         if (mediumVal) parts.push(`utm_medium=${mediumVal}`);
         if (campaignVal) parts.push(`utm_campaign=${campaignVal}`);
         if (contentVal) parts.push(`utm_content=${contentVal}`);
@@ -338,9 +338,14 @@
         if (parts.length) finalUrl += '?startapp='+parts.join('-');
       }
       else if (currentLinkType === 'topup') {
-        finalUrl = modeVal === 'skin'
-          ? 'https://steamify.io/topup/skins'
-          : 'https://steamify.io/topup';
+        // изменено: добавляем руб/долл путь вместо просто /topup
+        if (modeVal === 'skin') {
+          finalUrl = 'https://steamify.io/topup/skins';
+        } else {
+          finalUrl = (langVal === 'ru')
+            ? 'https://steamify.io/topup/rub'
+            : 'https://steamify.io/topup/usd';
+        }
         if (promoVal)    params.push(`promocode=${promoVal}`);
         if (sourceVal)   params.push(`utm_source=${sourceVal}`);
         if (mediumVal)   params.push(`utm_medium=${mediumVal}`);
@@ -374,7 +379,7 @@
       }
       else if (currentLinkType === 'tf2') {
         finalUrl = 'https://steamify.io/cashout/tf2';
-        if (sourceVal)   params.push(`utm_source=${sourceVal}`);
+        if (sourceVal)   params.push(`utm_source=${sourceVal}`);  
         if (mediumVal)   params.push(`utm_medium=${mediumVal}`);
         if (campaignVal) params.push(`utm_campaign=${campaignVal}`);
         if (contentVal)  params.push(`utm_content=${contentVal}`);
@@ -382,7 +387,7 @@
       }
       else if (currentLinkType === 'home') {
         finalUrl = 'https://steamify.io/';
-        if (sourceVal)   params.push(`utm_source=${sourceVal}`);
+        if (sourceVal)   params.push(`utm_source=${sourceVal}`);  
         if (mediumVal)   params.push(`utm_medium=${mediumVal}`);
         if (campaignVal) params.push(`utm_campaign=${campaignVal}`);
         if (contentVal)  params.push(`utm_content=${contentVal}`);
@@ -392,7 +397,6 @@
       if (params.length) {
         finalUrl += (finalUrl.includes('?') ? '&' : '?') + params.join('&');
       }
-
       document.getElementById('finalLink').value = finalUrl;
     }
 
@@ -414,9 +418,7 @@
       try {
         localStorage.setItem(STORAGE_KEY_POPULAR, JSON.stringify(popularValues));
         localStorage.setItem(STORAGE_KEY_LASTLINKS, JSON.stringify(lastLinks));
-      } catch (e) {
-        console.warn(e);
-      }
+      } catch (e) { console.warn(e); }
     }
 
     function updatePopularity() {
